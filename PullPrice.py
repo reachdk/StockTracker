@@ -45,6 +45,15 @@ def update_meta():
 
     return
 
+def notify(notify_data):
+    notify_data = pd.read_csv('data/data.csv', header=0, index_col=0)
+    for index, row in notify_data.iterrows():
+        if (row['high'] - (row['tolerance']/100)*row['high']) < row['close']:
+            print('do nothing')
+        else:
+            print('we have a problem')
+
+
 def update_price():
     # get the history
     curr_day = datetime.datetime.today()
@@ -64,6 +73,8 @@ def update_price():
 
     symbol_list.to_csv('data/data.csv')
 
+    notify(symbol_list)
 
-def notify(investments):
-    # Check diff between updated last closed and updated peak
+
+
+
