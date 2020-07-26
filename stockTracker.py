@@ -95,7 +95,7 @@ def calculate_variance():
 
     if subject:
         notify(subject, msg)
-    #else:                          #for debugging
+    # else:                          #for debugging
     #    print('Nothing to report')
 
     return
@@ -112,7 +112,7 @@ def notify(subject, body):
 
     # Send the message via our own SMTP server.
     s = smtplib.SMTP('smtp-relay.sendinblue.com', 587)
-    s.login('springfields.e704@gmail.com', 'hPJtz3wQ6fp5LaG0')
+    s.login('<loginid>', '<Key>')
     s.send_message(msg)
     s.quit()
 
