@@ -1,11 +1,14 @@
 import glob
-import smtplib
-from email.message import EmailMessage
+#import smtplib --needed for generic message
+# from email.message import EmailMessage -- needed for generic smtp
 import sys
 import yfinance as yf
 import pandas as pd
 import datetime
 from pandas.tseries.offsets import BDay
+#from mailin import Mailin --needed only for the smtp api
+import requests
+import json
 
 
 def get_investments():
@@ -123,7 +126,7 @@ def calculate_variance():
     return
 
 
-def notify(subject, body):
+def notify_old(subject, body):
     msg = EmailMessage()
     msg.set_content(body)
     # me == the sender's email address
@@ -137,6 +140,62 @@ def notify(subject, body):
     s.login('springfields.e704@gmail.com', 'hPJtz3wQ6fp5LaG0')
     s.send_message(msg)
     s.quit()
+
+def notify_smtp():
+    mail_subject = "Stock Alert"
+    msg_body = 'Deepak Kumar \n\nStock 1 ------- 100\nStock 2------ 200'
+    m = Mailin("https://api.sendinblue.com/v2.0", "hPJtz3wQ6fp5LaG0")
+
+    data = {"to": {"netmaildeepak@gmail.com": "Deepak"},
+            "from": ["deepak@stocktracker", "Stock Tracking"],
+            "subject": mail_subject,
+            "text": msg_body,
+            }
+
+    result = m.send_email(data)
+    print(result)
+
+def notify():
+    sender_email = 'springfields.e704@gmail.com'
+    sender_name = 'Deepak Kumar'
+    to_email = 'netmaildeepak@gmail.com'
+    to_name = 'Deepak Kumar'
+    replyTo_name = 'Deepak Kumar'
+    replyTo_email = 'springfields.e704@gmail.com'
+    mail_subject = 'Stock Alert'
+    mail_body = 'Consider Selling now'
+
+
+    url = "https://api.sendinblue.com/v3/smtp/email"
+
+    construct_payload = {
+        "sender": {
+            "email": sender_email,
+            "name": sender_name},
+        "to": {
+            "email": to_email,
+            "name": to_name},
+        "replyTo": {
+            "email": replyTo_email,
+            "name": replyTo_name},
+        "textContent": mail_body,
+        "subject": mail_subject}
+
+    # convert into JSON:
+    payload = json.dumps(construct_payload)
+
+    headers = {
+        'accept': "application/json",
+        'content-type': "application/json",
+        'api-key': "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",
+    }
+
+    response = requests.request("POST", url, data=payload, headers=headers)
+
+    print(response.text)
+
+
+
 
 
 def main():
