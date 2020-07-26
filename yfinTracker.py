@@ -187,7 +187,7 @@ def notify():
     headers = {
         'accept': "application/json",
         'content-type': "application/json",
-        'api-key': "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",
+        'api-key': "<Key here>",
     }
 
     response = requests.request("POST", url, data=payload, headers=headers)
