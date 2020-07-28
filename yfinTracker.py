@@ -118,7 +118,7 @@ def calculate_variance():
             msg = msg + elements[0] + ':       ' + str(elements[1]) + '\n'
         msg = msg + '\n'
 
-    if subject:
+    #if subject:
         # print('Sending Email')
         notify(subject, msg)
     # else:
@@ -141,19 +141,6 @@ def notify_old(subject, body):
     s.send_message(msg)
     s.quit()
 
-def notify_smtp():
-    mail_subject = "Stock Alert"
-    msg_body = 'Deepak Kumar \n\nStock 1 ------- 100\nStock 2------ 200'
-    m = Mailin("https://api.sendinblue.com/v2.0", "hPJtz3wQ6fp5LaG0")
-
-    data = {"to": {"netmaildeepak@gmail.com": "Deepak"},
-            "from": ["deepak@stocktracker", "Stock Tracking"],
-            "subject": mail_subject,
-            "text": msg_body,
-            }
-
-    result = m.send_email(data)
-    print(result)
 
 def notify():
     sender_email = 'springfields.e704@gmail.com'
