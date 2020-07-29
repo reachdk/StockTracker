@@ -6,7 +6,7 @@ import yfinance as yf
 import pandas as pd
 import datetime
 from pandas.tseries.offsets import BDay
-#from mailin import Mailin --needed only for the smtp api
+from mailin import Mailin
 import requests
 import json
 
@@ -127,19 +127,40 @@ def calculate_variance():
 
 
 def notify_old(subject, body):
-    msg = EmailMessage()
-    msg.set_content(body)
-    # me == the sender's email address
-    # you == the recipient's email address
-    msg['Subject'] = subject
-    msg['From'] = 'deepak@stockalert'
-    msg['To'] = 'netmaildeepak@gmail.com'
+    sender_email = 'springfields.e704@gmail.com'
+    sender_name = 'Deepak Kumar'
+    to_email = 'kdeepu@gmail.com'
+    to_name = 'Deepak Kumar'
+    replyTo_name = 'Deepak Kumar'
+    replyTo_email = 'springfields.e704@gmail.com'
+    mail_subject = 'Stock Alert'
+    mail_body = 'Consider Selling now'
+
+    construct_payload = {
+        "sender": {
+            "email": sender_email,
+            "name": sender_name},
+        "to": {
+            "email": 'kdeepu@gmail.com',
+            "name": to_name},
+        "replyTo": {
+            "email": replyTo_email,
+            "name": replyTo_name},
+        "textContent": mail_body,
+        "subject": mail_subject}
+
+    data = {"to": {to_email: to_name},
+            "from": ["from@email.com", "from email!"],
+            "subject": "My subject",
+            "html": "This is the <h1>HTML</h1>",
+            }
+
+    payload = json.dumps(construct_payload)
 
     # Send the message via our own SMTP server.
-    s = smtplib.SMTP('smtp-relay.sendinblue.com', 587)
-    s.login('springfields.e704@gmail.com', 'hPJtz3wQ6fp5LaG0')
-    s.send_message(msg)
-    s.quit()
+    s = Mailin("https://api.sendinblue.com/v2.0","<key>>")
+    response = s.send_email(data)
+    print(response)
 
 
 def notify():
@@ -160,8 +181,8 @@ def notify():
             "email": sender_email,
             "name": sender_name},
         "to": {
-            "email": to_email,
-            "name": to_name},
+            "email": to_email},
+            #"name": to_name},
         "replyTo": {
             "email": replyTo_email,
             "name": replyTo_name},
@@ -174,7 +195,7 @@ def notify():
     headers = {
         'accept': "application/json",
         'content-type': "application/json",
-        'api-key': "<Key here>",
+        'api-key': "<here>>",
     }
 
     response = requests.request("POST", url, data=payload, headers=headers)
