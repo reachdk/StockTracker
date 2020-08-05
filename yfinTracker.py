@@ -1,6 +1,7 @@
 import glob
-#import smtplib --needed for generic message
-# from email.message import EmailMessage -- needed for generic smtp
+import smtplib, ssl
+from email.message import EmailMessage
+from csv import reader
 import sys
 import yfinance as yf
 import pandas as pd
@@ -118,15 +119,60 @@ def calculate_variance():
             msg = msg + elements[0] + ':       ' + str(elements[1]) + '\n'
         msg = msg + '\n'
 
-    #if subject:
+        # if subject:
         # print('Sending Email')
-        notify(subject, msg)
+        #notify(subject, msg)
     # else:
     # print('Nothing to report')
     return
 
 
-def notify_old(subject, body):
+def notify():
+    msg = EmailMessage()
+    msg.set_content('Consider selling now')  # msg.set_content(body)
+    msg['Subject'] = 'Stock Alert'  # msg['Subject'] = subject
+    msg['From'] = 'springfields.e704@gmail.com'
+    msg['To'] = 'netmaildeepak@gmail.com'
+
+    from_addr = 'springfields.e704@gmail.com'
+    to_addr = 'netmaildeepak@gmail.com'
+    #message = 'From:springfields.e704@gmail.com\n Test message here'
+    #message = 'Subject: {Stock Alert}\n\n{}'.format(SUBJECT, TEXT)
+
+    message = """From: Ghar Springfields <springfields.e704@gmail.com>
+    To: Deepak Kumar <netmaildeepak@gmail.com>
+    MIME-Version: 1.0
+    Content-type: text/html
+    Subject: Stock Tracker alert testing
+
+    Consider selling this.
+    
+    """
+
+    readpass = pd.read_csv('Ignore for Inclusion/details_elastic.csv', header=None)
+
+    login_id = str(readpass.iloc[0, 0])
+    login_pass = str(readpass.iloc[0, 1])
+
+    server = smtplib.SMTP('smtp.elasticemail.com', 2525)
+    # incorporate this
+    server.login(login_id, login_pass)
+    server.sendmail(from_addr, to_addr, message)
+    server.sendmail(msg)
+    server.quit()
+
+
+
+
+
+    # Send the message via our own SMTP server.
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=ssl_context) as server:
+        server.login(login_id, login_pass)
+        server.sendmail(msg)
+
+
+def notify_oldest(subject, body):
     sender_email = 'springfields.e704@gmail.com'
     sender_name = 'Deepak Kumar'
     to_email = 'kdeepu@gmail.com'
@@ -158,12 +204,12 @@ def notify_old(subject, body):
     payload = json.dumps(construct_payload)
 
     # Send the message via our own SMTP server.
-    s = Mailin("https://api.sendinblue.com/v2.0","<key>>")
+    s = Mailin("https://api.sendinblue.com/v2.0", "<key>>")
     response = s.send_email(data)
     print(response)
 
 
-def notify():
+def notify_older():
     sender_email = 'springfields.e704@gmail.com'
     sender_name = 'Deepak Kumar'
     to_email = 'netmaildeepak@gmail.com'
@@ -173,7 +219,6 @@ def notify():
     mail_subject = 'Stock Alert'
     mail_body = 'Consider Selling now'
 
-
     url = "https://api.sendinblue.com/v3/smtp/email"
 
     construct_payload = {
@@ -182,7 +227,7 @@ def notify():
             "name": sender_name},
         "to": {
             "email": to_email},
-            #"name": to_name},
+        # "name": to_name},
         "replyTo": {
             "email": replyTo_email,
             "name": replyTo_name},
@@ -201,9 +246,6 @@ def notify():
     response = requests.request("POST", url, data=payload, headers=headers)
 
     print(response.text)
-
-
-
 
 
 def main():
