@@ -10,11 +10,13 @@ from pandas.tseries.offsets import BDay
 from mailin import Mailin
 import requests
 import json
+#Sendgrid
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 
 def get_investments():
     # get all the portfolio files and store them in input directory.
-
     input_files = glob.glob('data/input/*.csv')
     li = []
 
@@ -39,17 +41,27 @@ def get_investments():
 def update_meta():
     update_investments = pd.read_csv('data/yfin_investments.csv', header=0, index_col=0)
     update_data = pd.read_csv('data/yfin_data.csv', header=0, index_col=0)
+    delete_symbols = []
 
+    # Update the symbols that are available in investment input dumps from yahoo fin
     for symbol in update_investments.index:
         if symbol in update_data.index:
             continue
         else:
             update_data.loc[symbol] = [1, 1, 15, '']
 
+    # delete the records that need to be removed from the portfolio since they no longer appear in the investments
+    for symbol in update_data.index:
+        if symbol in update_investments.index:
+            continue
+        else:
+            delete_symbols.append(symbol)
+
+    update_data.drop(delete_symbols, inplace=True)
     update_data.sort_index(inplace=True)
     update_data.to_csv('data/yfin_data.csv')
 
-    return
+    return delete_symbols
 
 
 def update_price():
