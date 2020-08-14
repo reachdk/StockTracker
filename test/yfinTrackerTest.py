@@ -4,7 +4,7 @@ import yfinance as yf
 import pandas as pd
 import datetime
 from pandas.tseries.offsets import BDay
-import emailIntegration
+import emailIntegrationTest
 
 
 
@@ -21,21 +21,19 @@ def get_investments():
     # concat to a dataframe and clean up duplicates and extra columns
     investments = pd.concat(li, axis=0, ignore_index=True)
     investments.drop_duplicates(subset='Symbol', keep='first', inplace=True)
+    # Commenting next line since it is no longer necessary to strip the .NS suffix
+    # investments[['ticker', 'exchange']] = investments['Symbol'].str.split('.', n=1, expand=True)
     investments.drop(investments.columns[1:], axis=1, inplace=True)
-    # Set symbol as the index, all comparison operations will be easier on unique indexes.
     investments.set_index('Symbol', inplace=True)
     investments.sort_index(inplace=True)
-
-    # write back to the investments file that will be input for daily updates
-    investments.to_csv('data/yfin_investments.csv')
+    investments.to_csv('yfin_investments.csv')
 
     return
 
 
 def update_meta():
-    # Update data file in case the list of investments has changed. To reflect new purchases or sales
-    update_investments = pd.read_csv('data/yfin_investments.csv', header=0, index_col=0)
-    update_data = pd.read_csv('data/yfin_data.csv', header=0, index_col=0)
+    update_investments = pd.read_csv('yfin_investments.csv', header=0, index_col=0)
+    update_data = pd.read_csv('yfin_data.csv', header=0, index_col=0)
     delete_symbols = []
 
     # Update the symbols that are available in investment input dumps from yahoo fin
@@ -51,53 +49,42 @@ def update_meta():
             continue
         else:
             delete_symbols.append(symbol)
-    update_data.drop(delete_symbols, inplace=True)
 
-    # sort and write the data back to be consumed for daily updates
+    update_data.drop(delete_symbols, inplace=True)
     update_data.sort_index(inplace=True)
-    update_data.to_csv('data/yfin_data.csv')
+    update_data.to_csv('yfin_data.csv')
 
     return delete_symbols
 
 
 def update_price():
-    # Update price based on last 5 days of data from yahoo finance
     curr_day = datetime.datetime.today()
     prev_day = curr_day - BDay(5)
 
-    symbol_list = pd.read_csv('data/yfin_data.csv', index_col='symbol')
+    symbol_list = pd.read_csv('yfin_data.csv', index_col='symbol')
     ticker_list = symbol_list.index.tolist()
     ticker_list = [sub + ' ' for sub in ticker_list]
     ticker = ' '.join(ticker_list)
-
-    # fetch history from yahoo finance for the list of tickers
     ticker_hist = yf.download(ticker, start=prev_day, end=curr_day)
     ticker_hist = ticker_hist['Close']
 
     for column in ticker_hist:
-        # Update the lowest close price in the last 5 trading days
         symbol_list.loc[column, 'close'] = ticker_hist[column].min()
         symbol_list.loc[column, 'updated'] = datetime.date.today()
-
-        # update historic high price if the lowest close of the last 5 days is
-        # higher than currently recorded historic high
         if ticker_hist[column].min() > symbol_list.loc[column, 'high']:
             symbol_list.loc[column, 'high'] = ticker_hist[column].min()
 
-    symbol_list.to_csv('data/yfin_data.csv')
-    return
+    symbol_list.to_csv('yfin_data.csv')
+
 
 def calculate_variance():
-    # calculate if any of the notification thresholds have breached due to downward price movement
-    notify_data = pd.read_csv('data/yfin_data.csv', header=0, index_col=0)
-    # define threshold groups and subject and message to be passed in the notification
+    notify_data = pd.read_csv('yfin_data.csv', header=0, index_col=0)
     stocks5 = []
     stocks10 = []
     stocksbreach = []
     subject = ''
     msg = ''
 
-    # Check if any of the notifications have been breached.
     for index, row in notify_data.iterrows():
         diff = ((row['high'] - row['close']) / row['high']) * 100
         if diff < 5:
@@ -110,7 +97,6 @@ def calculate_variance():
         if diff > row['tolerance']:
             stocksbreach.append([row.name, diff])
 
-    # Construct the subject and message if there is a breach
     if stocksbreach:
         subject = "Stock Alert: Tolerance Breach on " + str(datetime.date.today())
         msg = 'Consider selling: \n' + ''
@@ -136,7 +122,6 @@ def calculate_variance():
             msg = msg + str(elements[0]) + ':       ' + str(elements[1]) + '\n'
         msg = msg + '\n'
 
-    # call notify function
     if subject:
         notify(subject, msg)
 
@@ -144,7 +129,6 @@ def calculate_variance():
 
 
 def notify(subject, msg):
-    # Construct the notification payload
     sender_email = 'springfields.e704@gmail.com'
     sender_name = 'Deepak Kumar'
     to_email = 'netmaildeepak@gmail.com'
@@ -155,8 +139,7 @@ def notify(subject, msg):
     html_body = ''
     mail_body = msg
 
-    # call elastic mail email api to send the email notification
-    mail_response = emailIntegration.Send(mail_subject, sender_email, sender_name, to_email, html_body, mail_body, True)
+    mail_response = emailIntegrationTest.Send(mail_subject, sender_email, sender_name, to_email, html_body, mail_body, True)
     print(mail_response)
 
     return
