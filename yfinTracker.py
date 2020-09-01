@@ -48,7 +48,7 @@ def update_meta():
         if symbol in update_data.index:
             continue
         else:
-            update_data.loc[symbol] = [1, 1, 15, '']
+            update_data.loc[symbol] = [1, '', 1, 15, '']
 
     # delete the records that need to be removed from the portfolio since they no longer appear in the investments
     for symbol in update_data.index:
