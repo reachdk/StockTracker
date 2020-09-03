@@ -56,6 +56,7 @@ def update_meta():
             continue
         else:
             delete_symbols.append(symbol)
+
     update_data.drop(delete_symbols, inplace=True)
 
     # sort and write the data back to be consumed for daily updates
