@@ -169,7 +169,7 @@ def notify(subject, msg):
     # Construct the notification payload
     sender_email = 'springfields.e704@gmail.com'
     sender_name = 'Deepak Kumar'
-    to_email = 'netmaildeepak@gmail.com'
+    to_email = 'netmaildeepak@gmail.com,springfields.e704@gmail.com'
     # to_name = 'Deepak Kumar'
     # replyTo_name = 'Deepak Kumar'
     # replyTo_email = 'springfields.e704@gmail.com'

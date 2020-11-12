@@ -108,7 +108,7 @@ def notify(subject, body):
     # you == the recipient's email address
     msg['Subject'] = subject
     msg['From'] = 'deepak@stockalert'
-    msg['To'] = 'netmaildeepak@gmail.com'
+    msg['To'] = 'netmaildeepak@gmail.com, springfields.e704@gmail.com'
 
     # Send the message via our own SMTP server.
     s = smtplib.SMTP('smtp-relay.sendinblue.com', 587)
